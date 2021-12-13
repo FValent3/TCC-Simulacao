@@ -1,0 +1,55 @@
+{
+    "compilerOptions": {
+        "baseUrl": "./src",
+        "paths": {
+            "@": [
+                "/*"
+            ],
+            "@simulation": [
+                "./simulation"
+            ],
+            "@simulation/*": [
+                "./simulation/*",
+            ],
+            "@utils": [
+                "./utils"
+            ],
+            "@utils/*": [
+                "./utils/*"
+            ],
+            "@libs": [
+                "./libs"
+            ],
+            "@libs/*": [
+                "./libs/*"
+            ],
+            "@queueSystem": [
+                "./queueSystem"
+            ],
+            "@queueSystem/*": [
+                "./queueSystem/*"
+            ],
+            "@generate": [
+                "./generate/"
+            ],
+            "@generate/*": [
+                "./generate/*"
+            ],
+            "@entities": [
+                "./entities/"
+            ],
+            "@entities/*": [
+                "./entities/*"
+            ],
+            "@algorithms": [
+                "./algorithms/"
+            ],
+            "@algorithm/*": [
+                "./algorithms/*"
+            ]
+        }
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}

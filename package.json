@@ -1,0 +1,33 @@
+{
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "random": "^3.0.6",
+    "seedrandom": "^3.0.5"
+  },
+  "scripts": {
+    "build": "babel src --extensions \".js\" --out-dir dist --copy-files --no-copy-ignored",
+    "start": "node dist/main/main.js",
+    "dev": "babel-node src/main/main.js",
+    "lint": "eslint --fix --ext js",
+    "generate": "babel-node src/generate/generate.js",
+    "compose": "babel-node src/compose.js"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.14.8",
+    "@babel/core": "^7.15.0",
+    "@babel/node": "^7.14.9",
+    "@babel/preset-env": "^7.15.0",
+    "babel-plugin-module-resolver": "^4.1.0",
+    "eslint": "^7.12.1",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-import-helpers": "^1.1.0",
+    "eslint-plugin-module-resolver": "^1.4.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.4.1",
+    "eslint-plugin-promise": "^4.2.1",
+    "prettier": "^2.3.2"
+  }
+}

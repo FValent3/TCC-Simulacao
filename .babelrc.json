@@ -1,0 +1,32 @@
+{
+    "presets": [
+        [
+            "@babel/env",
+            {
+                "targets": {
+                    "node": "current"
+                }
+            }
+        ]
+    ],
+    "plugins": [
+        [
+            "module-resolver",
+            {
+                "root": [
+                    "./src"
+                ],
+                "alias": {
+                    "@simulation": "./src/simulation",
+                    "@utils": "./src/utils",
+                    "@libs": "./src/libs",
+                    "@queueSystem": "./src/queueSystem",
+                    "@generate": "./src/generate",
+                    "@entities": "./src/entities",
+                    "@algorithms": "./src/algorithms"
+                },
+                "extensions": ".js"
+            }
+        ]
+    ]
+}
