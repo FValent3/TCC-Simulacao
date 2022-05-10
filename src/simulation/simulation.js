@@ -127,7 +127,7 @@ export const simulation = {
         return [...Array(populationSize)].map((_, id) => ({
             id: id,
             statusPipeline: 'available',
-            instanceSimulationData: {
+            simulationData: {
                 cumulativeSumTime: cumulativeSumsTime[id],
                 serviceTime: servingTime[id],
                 seatTime: seatsTime[id]
@@ -146,9 +146,9 @@ export const simulation = {
         const arrOfReferences = population.slice({ start: 0 }, numberOfServers)
 
         arrOfReferences.forEach(instance => {
-            const { instanceSimulationData } = instance
-            instanceSimulationData.serviceTime = SERVICE_TIME
-            instanceSimulationData.seatTime = SEAT_TIME
+            const { simulationData } = instance
+            simulationData.serviceTime = SERVICE_TIME
+            simulationData.seatTime = SEAT_TIME
         })
     },
 
@@ -162,20 +162,22 @@ export const simulation = {
     ) {
         makeDir(path)
         saveDataToJSON(`${path}/departures.json`, departures)
+
+        const meanWaitingTimeInArrivalsQueue = this.averageWaitingTimeQueue(
+            departures,
+            simulationData.populationSize - notProcessed
+        )
+        const meanWaitingTimeInSeatsQueue = this.averageWaitingTimeSeat(
+            departures,
+            simulationData.populationSize - notProcessed
+        )
+
         saveDataToJSON(`${path}/results.json`, {
             totalSimulationTime: currentSimulationTime,
-            meanWaitingTime: this.averageWaitingTime(
-                departures,
-                simulationData.populationSize - notProcessed
-            ),
-            meanWaitingTimeInArrivalsQueue: this.averageWaitingTimeQueue(
-                departures,
-                simulationData.populationSize - notProcessed
-            ),
-            meanWaitingTimeInSeatsQueue: this.averageWaitingTimeSeat(
-                departures,
-                simulationData.populationSize - notProcessed
-            ),
+            meanWaitingTime:
+                meanWaitingTimeInArrivalsQueue + meanWaitingTimeInSeatsQueue,
+            meanWaitingTimeInArrivalsQueue: meanWaitingTimeInArrivalsQueue,
+            meanWaitingTimeInSeatsQueue: meanWaitingTimeInSeatsQueue,
             meanLengthOfArrivalsQueue: this.averageSize(
                 dataPerRounds.arrivalsLength,
                 currentSimulationTime
@@ -207,7 +209,7 @@ export const simulation = {
                         s.simulation.serviceArrivalTime -
                         s.simulation.arrivalTime -
                         1 +
-                        (s.simulation.serviceArrivalTime -
+                        (s.simulation.seatArrivalTime -
                             s.simulation.serviceDepartureTime -
                             1)),
                 0
@@ -233,7 +235,7 @@ export const simulation = {
             departures.reduce(
                 (acc, s) =>
                     (acc +=
-                        s.simulation.serviceArrivalTime -
+                        s.simulation.seatArrivalTime -
                         s.simulation.serviceDepartureTime -
                         1),
                 0

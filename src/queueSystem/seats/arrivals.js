@@ -1,8 +1,10 @@
+'use strict'
+
 import {
     getAvailablePipelineObject,
     updatePipelineObjectToAvailable
 } from '@utils/pipeline'
-import { removeObjectsFromQueue } from '@utils/queue'
+import { removeFromQueue } from '@utils/queue'
 
 export function processSeatsArrivals(
     seats,
@@ -16,8 +18,9 @@ export function processSeatsArrivals(
         seatingCapacity,
         usingSeats.length
     )
+
     processNewSeatsArrivals(seatsArrivals, currentSimulationTime)
-    removeObjectsFromQueue(seats, seatsArrivals)
+    removeFromQueue(seats, seatsArrivals)
     printSeatsArrivals(seatsArrivals, debug)
     updatePipelineObjectToAvailable(seats, currentSimulationTime)
 
@@ -29,15 +32,15 @@ function getSeatsArrivals(pipeline, seatingCapacity, numberOfUsingSeats) {
 }
 
 function processNewSeatsArrivals(seatsArrivals, currentSimulationTime) {
-    seatsArrivals.forEach(instance => {
-        instance.simulation.serviceArrivalTime = currentSimulationTime
-    })
+    const seatsArrivalsLength = seatsArrivals.length
+    for (let i = 0; i < seatsArrivalsLength; i++) {
+        seatsArrivals[i].simulation.seatArrivalTime = currentSimulationTime
+    }
 }
 
 function printSeatsArrivals(seatsArrivals, debug) {
-    seatsArrivals.forEach(instance => {
-        if (debug) {
-            console.log(`A pessoa nº ${instance.id} sentou na mesa`)
-        }
+    if (!debug) return
+    seatsArrivals.forEach(arrival => {
+        console.log(`A pessoa nº ${arrival.id} sentou na mesa`)
     })
 }

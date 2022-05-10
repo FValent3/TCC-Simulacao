@@ -24,6 +24,7 @@ export function greedySortQueue(
         swapFactor,
         numberOfSeatsInSystem
     )
+
     orderByPriority(queue, priority, maxPenalitiesPerPerson)
     return 'executed'
 }
@@ -34,7 +35,7 @@ function determinePriority(
     numberOfSeatsInSystem
 ) {
     if (lengthOfQueueSeats >= swapFactor * numberOfSeatsInSystem)
-        return 'restaurantTablePriority'
+        return 'seatPriority'
     return 'queuePriority'
 }
 
@@ -49,12 +50,15 @@ function orderByPriority(queue, priority, maxPenalitiesPerPerson) {
         })
         .sort((x, y) => x[priority] - y[priority])
 
-    aux.forEach(element => newQueue.splice(queue[element], 0, element))
-    queue = newQueue
-    incrementQuantityOfPenalties(queue, originalQueue)
+    aux.forEach(element => newQueue.splice(element, 0, queue[element]))
+
+    let j = queue.length
+    while (j--) queue[j] = newQueue[j]
+
+    applyPenalties(queue, originalQueue)
 }
 
-function incrementQuantityOfPenalties(queue, originalQueue) {
+function applyPenalties(queue, originalQueue) {
     const queueLength = queue.length
     const originalQueueLength = originalQueue.length
     for (let j = 0; j < originalQueueLength; j++) {

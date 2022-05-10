@@ -1,6 +1,6 @@
 'use strict'
 
-import { removeObjectsFromQueue } from '@utils/queue'
+import { removeFromQueue } from '@utils/queue'
 
 export function processServiceDepartures(
     servers,
@@ -12,45 +12,36 @@ export function processServiceDepartures(
         servers,
         currentSimulationTime
     )
+
     processNewServiceDepartures(serviceDepartures, currentSimulationTime)
     printNewServiceDepartures(serviceDepartures, debug)
-    removeObjectsFromQueue(servers, serviceDepartures)
+    removeFromQueue(servers, serviceDepartures)
+
     return [...waitingSeats, ...serviceDepartures]
 }
 
 function getServiceDepartures(servers, currentSimulationTime) {
-    const filtered = []
-
-    for (let i = 0; i < servers.length; i++) {
-        const instance = servers[i]
-        const { simulation, instanceSimulationData } = instance
+    return servers.filter(departure => {
+        const { simulation, simulationData } = departure
         const arrivalTimeQueueSeats =
-            simulation.serviceArrivalTime + instanceSimulationData.serviceTime
-
-        if (currentSimulationTime >= arrivalTimeQueueSeats)
-            filtered.push(instance)
-    }
-
-    return servers.filter(instance => {
-        const { simulation, instanceSimulationData } = instance
-        const arrivalTimeQueueSeats =
-            simulation.serviceArrivalTime + instanceSimulationData.serviceTime
+            simulation.serviceArrivalTime + simulationData.serviceTime
 
         return currentSimulationTime >= arrivalTimeQueueSeats
     })
 }
 
 function processNewServiceDepartures(serviceDepartures, currentSimulationTime) {
-    serviceDepartures.forEach(instance => {
-        instance.statusPipeline = 'unavailable'
-        instance.simulation.serviceDepartureTime = currentSimulationTime
-    })
+    const serviceDeparturesLength = serviceDepartures.length
+    for (let i = 0; i < serviceDeparturesLength; i++) {
+        serviceDepartures[i].simulation.serviceDepartureTime =
+            currentSimulationTime
+        serviceDepartures[i].statusPipeline = 'unavailable'
+    }
 }
 
 function printNewServiceDepartures(serviceDepartures, debug) {
-    serviceDepartures.forEach(instance => {
-        if (debug) {
-            console.log(`A pessoa nº ${instance.id} finalizou o serviço`)
-        }
+    if (!debug) return
+    serviceDepartures.forEach(departure => {
+        console.log(`A pessoa nº ${departure.id} finalizou o serviço`)
     })
 }

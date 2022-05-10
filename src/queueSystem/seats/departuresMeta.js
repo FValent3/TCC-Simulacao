@@ -1,3 +1,5 @@
+'use strict'
+
 export function processSeatsDeparturesMeta(
     seats,
     departures,
@@ -5,50 +7,40 @@ export function processSeatsDeparturesMeta(
     debug
 ) {
     const seatsDepartures = getSeatsDepartures(seats, currentSimulationTime)
+
     processNewSeatsDepartures(seatsDepartures, currentSimulationTime)
     printSeatsDepartures(seatsDepartures, debug)
-    removeObjectsFromQueue(seats, seatsDepartures)
+    removeFromQueue(seats, seatsDepartures)
 
     return [...departures, ...seatsDepartures]
 }
 
 function getSeatsDepartures(seats, currentSimulationTime) {
-    const restaurantTableLength = seats.length
-    const filtered = []
-    for (let i = 0; i < restaurantTableLength; i++) {
-        if (seats[i] === null || seats[i] === undefined) continue
-        const instance = seats[i]
+    return seats.filter(seat => {
+        if (seat === null || seat === undefined) return
 
-        const { simulation, instanceSimulationData } = seats[i]
+        const { simulation, simulationData } = seat
         const departureTime =
-            simulation.serviceArrivalTime + instanceSimulationData.seatTime
+            simulation.seatArrivalTime + simulationData.seatTime
 
-        if (currentSimulationTime >= departureTime) filtered.push(instance)
-    }
-    return filtered
+        if (currentSimulationTime >= departureTime) return seat
+    })
 }
 
 function processNewSeatsDepartures(seatsDepartures, currentSimulationTime) {
-    seatsDepartures.forEach(instance => {
-        instance.statusPipeline = 'unavailable'
-        instance.simulation.restaurantTableDepartureTime = currentSimulationTime
-    })
+    const seatsDeparturesLength = seatsDepartures.length
+    for (let i = 0; i < seatsDeparturesLength; i++) {
+        seatsDepartures[i].simulation.seatDepartureTime = currentSimulationTime
+        seatsDepartures[i].statusPipeline = 'unavailable'
+    }
 }
 
-function printSeatsDepartures(seatsDepartures, debug) {
-    seatsDepartures.forEach(instance => {
-        if (debug) {
-            console.log(`A pessoa nº ${instance.id} desocupou a mesa`)
-        }
-    })
-}
-
-function removeObjectsFromQueue(queue, instancesToRemove) {
-    const instancesToRemoveLength = instancesToRemove.length
+function removeFromQueue(queue, toRemove) {
+    const toRemoveLength = toRemove.length
     let countSplice = 0
-    for (let j = 0; j < instancesToRemoveLength; j++) {
+    for (let j = 0; j < toRemoveLength; j++) {
         for (let i = 0; i < queue.length; i++) {
-            if (instancesToRemove[j].id === queue[i].id) {
+            if (toRemove[j].id === queue[i].id) {
                 queue.splice(i--, 1)
                 countSplice++
                 break
@@ -59,4 +51,11 @@ function removeObjectsFromQueue(queue, instancesToRemove) {
     for (let i = 0; i < countSplice; i++) {
         queue.push(null)
     }
+}
+
+function printSeatsDepartures(seatsDepartures, debug) {
+    if (!debug) return
+    seatsDepartures.forEach(departure => {
+        console.log(`A pessoa nº ${departure.id} desocupou a mesa`)
+    })
 }

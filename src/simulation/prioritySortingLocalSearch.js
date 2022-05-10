@@ -169,8 +169,8 @@ export const prioritySortingLocalSearch = Object.assign(heritage, {
                 statusPipeline: 'available',
                 penalties: 0,
                 queuePriority: cumulativeSumsNormalizedTime[id],
-                restaurantTablePriority: seatsNormalizedTime[id],
-                instanceSimulationData: {
+                seatPriority: seatsNormalizedTime[id],
+                simulationData: {
                     cumulativeSumTime: cumulativeSumsTime[id],
                     serviceTime: distributions.service[id],
                     seatTime: distributions.seats[id]
@@ -191,7 +191,8 @@ export const prioritySortingLocalSearch = Object.assign(heritage, {
 
     getNumberOfOccupiedSpaces(arr) {
         let count = 0
-        for (let i = 0; i < arr.length; i++) {
+        const arrLength = arr.length
+        for (let i = 0; i < arrLength; i++) {
             if (arr[i] === null || arr[i] === undefined) continue
             count++
         }
@@ -221,20 +222,22 @@ export const prioritySortingLocalSearch = Object.assign(heritage, {
         })
         makeDir(path)
         saveDataToJSON(`${path}/departures.json`, departures)
+
+        const meanWaitingTimeInArrivalsQueue = this.averageWaitingTimeQueue(
+            departures,
+            simulationData.populationSize - notProcessed
+        )
+        const meanWaitingTimeInSeatsQueue = this.averageWaitingTimeSeat(
+            departures,
+            simulationData.populationSize - notProcessed
+        )
+
         saveDataToJSON(`${path}/results.json`, {
             totalSimulationTime: currentSimulationTime,
-            meanWaitingTime: this.averageWaitingTime(
-                departures,
-                simulationData.populationSize - notProcessed
-            ),
-            meanWaitingTimeInArrivalsQueue: this.averageWaitingTimeQueue(
-                departures,
-                simulationData.populationSize - notProcessed
-            ),
-            meanWaitingTimeInSeatsQueue: this.averageWaitingTimeSeat(
-                departures,
-                simulationData.populationSize - notProcessed
-            ),
+            meanWaitingTime:
+                meanWaitingTimeInArrivalsQueue + meanWaitingTimeInSeatsQueue,
+            meanWaitingTimeInArrivalsQueue: meanWaitingTimeInArrivalsQueue,
+            meanWaitingTimeInSeatsQueue: meanWaitingTimeInSeatsQueue,
             meanLengthOfArrivalsQueue: this.averageSize(
                 dataPerRounds.arrivalsLength,
                 currentSimulationTime

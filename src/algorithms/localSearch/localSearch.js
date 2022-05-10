@@ -1,7 +1,8 @@
 'use strict'
 
 import { copyObject } from '@utils/object'
-import { removeObjectsFromQueue } from '@utils/queue'
+import { removeFromQueue } from '@utils/queue'
+
 export function localSearch(arrivals, seats, intervalBetweenRounds, state) {
     if (state === 'notExecuted') return
 
@@ -19,12 +20,15 @@ export function localSearch(arrivals, seats, intervalBetweenRounds, state) {
     let currentSolution = firstSolution
     for (let i = 0; i < firstSolution.queue.length; i++) {
         removed.push(firstSolution.queue[i])
+
         const newArrivals = copyObject(arrivals)
-        removeObjectsFromQueue(newArrivals, removed)
+        removeFromQueue(newArrivals, removed)
+
         const newSolution = getNewSolution(
             newArrivals,
             copyObject(remainingTimeInTables)
         )
+
         if (newSolution.effectiveness < currentSolution.effectiveness) {
             currentSolution = newSolution
         } else {
@@ -32,7 +36,7 @@ export function localSearch(arrivals, seats, intervalBetweenRounds, state) {
         }
     }
 
-    removeObjectsFromQueue(arrivals, removed)
+    removeFromQueue(arrivals, removed)
     for (const el of removed) {
         arrivals.push(el)
     }
@@ -42,12 +46,15 @@ function getRemainingTimeInTables(seats, intervalBetweenRounds) {
     const remainingTimeInTables = []
 
     for (let i = 0; i < seats.length; i++) {
+        let remainingTime
+
         if (seats[i] === null || seats[i] === undefined) {
-            remainingTimeInTables.push(intervalBetweenRounds)
+            remainingTime = intervalBetweenRounds
+            remainingTimeInTables.push(remainingTime)
         } else {
-            remainingTimeInTables.push(
-                intervalBetweenRounds - seats[i].instanceSimulationData.seatTime
-            )
+            remainingTime =
+                intervalBetweenRounds - seats[i].simulationData.seatTime
+            remainingTimeInTables.push(remainingTime)
         }
     }
     return remainingTimeInTables
@@ -70,7 +77,7 @@ function getNewSolution(queue, remainingTimeInTables, solution = []) {
 
         const instance = queue[i]
         const remainingTime = remainingTimeInTables[j]
-        const timeToBeBurned = instance.instanceSimulationData.seatTime
+        const timeToBeBurned = instance.simulationData.seatTime
 
         if (remainingTime >= timeToBeBurned) {
             remainingTimeInTables[j] = remainingTime - timeToBeBurned
@@ -88,5 +95,6 @@ function getNewSolution(queue, remainingTimeInTables, solution = []) {
     const effectiveness = remainingTimeInTables.reduce(
         (previousValue, currentValue) => previousValue + currentValue
     )
+
     return { queue: solution, effectiveness: effectiveness }
 }

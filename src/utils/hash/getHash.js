@@ -1,6 +1,6 @@
 'use strict'
 
-import { getDateMilliseconds } from '@utils/date'
+import { getDateMilliseconds } from '@utils/data'
 import crypto from 'crypto'
 import random from 'random'
 

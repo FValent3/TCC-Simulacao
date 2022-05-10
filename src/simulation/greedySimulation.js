@@ -163,7 +163,7 @@ export const greedySimulation = Object.assign(heritage, {
                 penalties: 0,
                 queuePriority: cumulativeSumsNormalizedTime[id],
                 seatPriority: seatsNormalizedTime[id],
-                instanceSimulationData: {
+                simulationData: {
                     cumulativeSumTime: cumulativeSumsTime[id],
                     serviceTime: distributions.service[id],
                     seatTime: distributions.seats[id]
@@ -196,20 +196,21 @@ export const greedySimulation = Object.assign(heritage, {
         })
         makeDir(path)
         saveDataToJSON(`${path}/departures.json`, departures)
+        const meanWaitingTimeInArrivalsQueue = this.averageWaitingTimeQueue(
+            departures,
+            simulationData.populationSize - notProcessed
+        )
+        const meanWaitingTimeInSeatsQueue = this.averageWaitingTimeSeat(
+            departures,
+            simulationData.populationSize - notProcessed
+        )
+
         saveDataToJSON(`${path}/results.json`, {
             totalSimulationTime: currentSimulationTime,
-            meanWaitingTime: this.averageWaitingTime(
-                departures,
-                simulationData.populationSize - notProcessed
-            ),
-            meanWaitingTimeInArrivalsQueue: this.averageWaitingTimeQueue(
-                departures,
-                simulationData.populationSize - notProcessed
-            ),
-            meanWaitingTimeInSeatsQueue: this.averageWaitingTimeSeat(
-                departures,
-                simulationData.populationSize - notProcessed
-            ),
+            meanWaitingTime:
+                meanWaitingTimeInArrivalsQueue + meanWaitingTimeInSeatsQueue,
+            meanWaitingTimeInArrivalsQueue: meanWaitingTimeInArrivalsQueue,
+            meanWaitingTimeInSeatsQueue: meanWaitingTimeInSeatsQueue,
             meanLengthOfArrivalsQueue: this.averageSize(
                 dataPerRounds.arrivalsLength,
                 currentSimulationTime

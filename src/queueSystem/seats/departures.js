@@ -1,4 +1,6 @@
-import { removeObjectsFromQueue } from '@utils/queue'
+'use strict'
+
+import { removeFromQueue } from '@utils/queue'
 
 export function processSeatsDepartures(
     seats,
@@ -7,39 +9,35 @@ export function processSeatsDepartures(
     debug
 ) {
     const seatsDepartures = getSeatsDepartures(seats, currentSimulationTime)
+
     processNewSeatsDepartures(seatsDepartures, currentSimulationTime)
     printSeatsDepartures(seatsDepartures, debug)
-    removeObjectsFromQueue(seats, seatsDepartures)
+    removeFromQueue(seats, seatsDepartures)
 
     return [...departures, ...seatsDepartures]
 }
 
 function getSeatsDepartures(seats, currentSimulationTime) {
-    const restaurantTableLength = seats.length
-    const filtered = []
-    for (let i = 0; i < restaurantTableLength; i++) {
-        const instance = seats[i]
-
-        const { simulation, instanceSimulationData } = seats[i]
+    return seats.filter(seat => {
+        const { simulation, simulationData } = seat
         const departureTime =
-            simulation.serviceArrivalTime + instanceSimulationData.seatTime
+            simulation.seatArrivalTime + simulationData.seatTime
 
-        if (currentSimulationTime >= departureTime) filtered.push(instance)
-    }
-    return filtered
-}
-
-function processNewSeatsDepartures(seatsDepartures, currentSimulationTime) {
-    seatsDepartures.forEach(instance => {
-        instance.statusPipeline = 'unavailable'
-        instance.simulation.restaurantTableDepartureTime = currentSimulationTime
+        if (currentSimulationTime >= departureTime) return seat
     })
 }
 
+function processNewSeatsDepartures(seatsDepartures, currentSimulationTime) {
+    const seatsDeparturesLength = seatsDepartures.length
+    for (let i = 0; i < seatsDeparturesLength; i++) {
+        seatsDepartures[i].simulation.seatDepartureTime = currentSimulationTime
+        seatsDepartures[i].statusPipeline = 'unavailable'
+    }
+}
+
 function printSeatsDepartures(seatsDepartures, debug) {
-    seatsDepartures.forEach(instance => {
-        if (debug) {
-            console.log(`A pessoa nº ${instance.id} desocupou a mesa`)
-        }
+    if (!debug) return
+    seatsDepartures.forEach(departure => {
+        console.log(`A pessoa nº ${departure.id} desocupou a mesa`)
     })
 }

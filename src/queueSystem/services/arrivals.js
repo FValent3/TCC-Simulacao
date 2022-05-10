@@ -1,8 +1,10 @@
+'use strict'
+
 import {
     getAvailablePipelineObject,
     updatePipelineObjectToAvailable
 } from '@utils/pipeline'
-import { removeObjectsFromQueue } from '@utils/queue'
+import { removeFromQueue } from '@utils/queue'
 
 export function processServicesArrivals(
     arrivals,
@@ -19,7 +21,7 @@ export function processServicesArrivals(
         servers.length
     )
 
-    removeObjectsFromQueue(arrivals, serviceNewArrivals)
+    removeFromQueue(arrivals, serviceNewArrivals)
     processNewServiceArrivals(serviceNewArrivals, currentSimulationTime)
     printNewServicesArrivals(serviceNewArrivals, debug)
     updatePipelineObjectToAvailable(arrivals)
@@ -32,15 +34,16 @@ function getNewServiceArrivals(pipeline, serviceCapacity, serviceLength) {
 }
 
 function processNewServiceArrivals(serviceNewArrivals, currentSimulationTime) {
-    serviceNewArrivals.forEach(instance => {
-        instance.simulation.serviceArrivalTime = currentSimulationTime
-    })
+    const serviceNewArrivalsLength = serviceNewArrivals.length
+    for (let i = 0; i < serviceNewArrivalsLength; i++) {
+        serviceNewArrivals[i].simulation.serviceArrivalTime =
+            currentSimulationTime
+    }
 }
 
 function printNewServicesArrivals(serviceNewArrivals, debug) {
-    serviceNewArrivals.forEach(instance => {
-        if (debug) {
-            console.log(`A pessoa nº ${instance.id} iniciou o serviço`)
-        }
+    if (!debug) return
+    serviceNewArrivals.forEach(arrival => {
+        console.log(`A pessoa nº ${arrival.id} iniciou o serviço`)
     })
 }

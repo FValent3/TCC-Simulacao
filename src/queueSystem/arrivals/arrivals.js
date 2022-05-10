@@ -1,4 +1,6 @@
-import { removeObjectsFromQueue } from '@utils/queue'
+'use strict'
+
+import { removeFromQueue } from '@utils/queue'
 
 export function processArrivals(
     population,
@@ -9,35 +11,30 @@ export function processArrivals(
     const newArrivals = getNewArrivals(population, currentSimulationTime)
     processNewArrivals(newArrivals, currentSimulationTime)
     printNewArrivals(newArrivals, debug)
-    removeObjectsFromQueue(population, newArrivals)
+    removeFromQueue(population, newArrivals)
+
     return [...arrivals, ...newArrivals]
 }
 
 function getNewArrivals(population, currentSimulationTime) {
-    const filtered = []
-
-    const populationLength = population.length
-    for (let i = 0; i < populationLength; i++) {
-        const instance = population[i]
-        const { instanceSimulationData } = instance
-        if (currentSimulationTime >= instanceSimulationData.cumulativeSumTime) {
-            filtered.push(instance)
-        }
-    }
-    return filtered
-}
-
-function processNewArrivals(newArrivals, currentSimulationTime) {
-    newArrivals.forEach(instance => {
-        instance.statusPipeline = 'unavailable'
-        instance.simulation.arrivalTime = currentSimulationTime
+    return population.filter(arrival => {
+        const { simulationData } = arrival
+        const { cumulativeSumTime } = simulationData
+        return currentSimulationTime >= cumulativeSumTime
     })
 }
 
+function processNewArrivals(newArrivals, currentSimulationTime) {
+    const newArrivalsLength = newArrivals.length
+    for (let i = 0; i < newArrivalsLength; i++) {
+        newArrivals[i].simulation.arrivalTime = currentSimulationTime
+        newArrivals[i].statusPipeline = 'unavailable'
+    }
+}
+
 function printNewArrivals(newArrivals, debug = false) {
-    newArrivals.forEach(instance => {
-        if (debug) {
-            console.log(`A pessoa nº ${instance.id} entrou na fila`)
-        }
+    if (!debug) return
+    newArrivals.forEach(arrival => {
+        console.log(`A pessoa nº ${arrival.id} entrou na fila`)
     })
 }

@@ -2,16 +2,12 @@
 
 import { getHash } from '@utils/hash'
 
-export function generateSeeds(numberOfReplications = 20) {
-    const arrSeeds = []
-    for (let index = 0; index < numberOfReplications; index++) {
-        const seeds = {
-            id: index,
-            arrivals: getHash(),
-            service: getHash(),
-            departures: getHash()
-        }
-        arrSeeds.push(seeds)
-    }
-    return arrSeeds
+export function generateSeed0s(numberOfReplications = 20) {
+    const arrSeeds = new Array(numberOfReplications).fill(-1)
+    return arrSeeds.map((_, index) => ({
+        id: index,
+        arrivals: getHash(),
+        service: getHash(),
+        departures: getHash()
+    }))
 }
