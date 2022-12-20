@@ -6,6 +6,7 @@ data/
 
 # dist directory for storing compiled files
 dist/
+scripts/
 
 # Logs
 logs

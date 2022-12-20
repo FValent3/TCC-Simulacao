@@ -11,7 +11,8 @@
     "dev": "babel-node src/main/main.js",
     "lint": "eslint --fix --ext js",
     "generate": "babel-node src/generate/generate.js",
-    "compose": "babel-node src/compose.js"
+    "compose": "babel-node src/compose.js",
+    "makegraph": "babel-node src/main/makeGraphs.js"
   },
   "devDependencies": {
     "@babel/cli": "^7.14.8",
