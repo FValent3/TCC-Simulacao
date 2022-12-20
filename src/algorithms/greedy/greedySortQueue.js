@@ -2,50 +2,13 @@
 
 import { copyObject } from '@utils/object'
 
-export function greedySortQueue(
-    queue,
-    intervalBetweenRounds,
-    lengthOfQueueSeats,
-    numberOfSeatsInSystem,
-    quantityRounds,
-    swapFactor,
-    maxPenalitiesPerPerson,
-    currentSimulationTime
-) {
-    const currentRound = currentSimulationTime % intervalBetweenRounds
-    if (
-        currentSimulationTime % intervalBetweenRounds !== 0 ||
-        currentRound > quantityRounds
-    )
-        return 'notExecuted'
-
-    const priority = determinePriority(
-        lengthOfQueueSeats,
-        swapFactor,
-        numberOfSeatsInSystem
-    )
-
-    orderByPriority(queue, priority, maxPenalitiesPerPerson)
-    return 'executed'
-}
-
-function determinePriority(
-    lengthOfQueueSeats,
-    swapFactor,
-    numberOfSeatsInSystem
-) {
-    if (lengthOfQueueSeats >= swapFactor * numberOfSeatsInSystem)
-        return 'seatPriority'
-    return 'queuePriority'
-}
-
-function orderByPriority(queue, priority, maxPenalitiesPerPerson) {
+export function greedySortQueue(queue, priority, maxPenalitiesPerPerson) {
     const originalQueue = copyObject(queue)
     const aux = []
 
     const newQueue = queue
         .filter((element, index) => {
-            if (element.penalties <= maxPenalitiesPerPerson) return element
+            if (element.penalties < maxPenalitiesPerPerson) return element
             aux.push(index)
         })
         .sort((x, y) => x[priority] - y[priority])

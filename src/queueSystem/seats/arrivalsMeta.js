@@ -1,4 +1,4 @@
-' use strict'
+'use strict'
 
 import {
     getAvailablePipelineObject,
@@ -20,12 +20,13 @@ export function processSeatsArrivalsMeta(
     )
 
     processNewSeatsArrivals(seatsArrivals, currentSimulationTime)
-    removeFromQueue(seats, seatsArrivals)
     printSeatsArrivals(seatsArrivals, debug)
+    removeFromQueue(seats, seatsArrivals)
     updatePipelineObjectToAvailable(seats, currentSimulationTime)
 
     const usingSeatsLength = usingSeats.length
     for (let i = 0; i < usingSeatsLength; i++) {
+        if (seatsArrivals.length === 0) break
         if (getNumberOfOccupiedSpaces(usingSeats) < seatingCapacity) {
             if (usingSeats[i] === null || usingSeats[i] === undefined) {
                 usingSeats[i] = seatsArrivals.shift()

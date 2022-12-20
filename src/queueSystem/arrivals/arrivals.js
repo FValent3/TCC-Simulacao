@@ -8,7 +8,7 @@ export function processArrivals(
     currentSimulationTime,
     debug
 ) {
-    const newArrivals = getNewArrivals(population, currentSimulationTime)
+    const newArrivals = getArrivals(population, currentSimulationTime)
     processNewArrivals(newArrivals, currentSimulationTime)
     printNewArrivals(newArrivals, debug)
     removeFromQueue(population, newArrivals)
@@ -16,7 +16,7 @@ export function processArrivals(
     return [...arrivals, ...newArrivals]
 }
 
-function getNewArrivals(population, currentSimulationTime) {
+function getArrivals(population, currentSimulationTime) {
     return population.filter(arrival => {
         const { simulationData } = arrival
         const { cumulativeSumTime } = simulationData

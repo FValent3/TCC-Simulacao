@@ -15,21 +15,21 @@ export function processServicesArrivals(
 ) {
     const pipeline = getAvailablePipelineObject(arrivals)
 
-    const serviceNewArrivals = getNewServiceArrivals(
+    const serviceArrivals = getServiceArrivals(
         pipeline,
         serviceCapacity,
         servers.length
     )
 
-    removeFromQueue(arrivals, serviceNewArrivals)
-    processNewServiceArrivals(serviceNewArrivals, currentSimulationTime)
-    printNewServicesArrivals(serviceNewArrivals, debug)
+    processNewServiceArrivals(serviceArrivals, currentSimulationTime)
+    printNewServicesArrivals(serviceArrivals, debug)
+    removeFromQueue(arrivals, serviceArrivals)
     updatePipelineObjectToAvailable(arrivals)
 
-    return [...servers, ...serviceNewArrivals]
+    return [...servers, ...serviceArrivals]
 }
 
-function getNewServiceArrivals(pipeline, serviceCapacity, serviceLength) {
+function getServiceArrivals(pipeline, serviceCapacity, serviceLength) {
     return pipeline.splice(0, serviceCapacity - serviceLength)
 }
 

@@ -47,8 +47,9 @@ export const greedySimulation = Object.assign(heritage, {
             simulationData.numberOfServers
         )
 
-        const intervalBetweenRounds =
-            simulationData.maxSimulationTime / algorithmConfig.rounds - 1
+        const intervalBetweenRounds = Math.round(
+            simulationData.maxSimulationTime / (algorithmConfig.rounds + 1)
+        )
         const maxPenalitiesPerPerson = 1
 
         while (
@@ -61,16 +62,21 @@ export const greedySimulation = Object.assign(heritage, {
                 currentSimulationTime
             )
 
-            greedySortQueue(
-                arrivals,
-                intervalBetweenRounds,
-                seats.length,
-                simulationData.numberOfSeats,
-                algorithmConfig.rounds,
-                algorithmConfig.swapFactor,
-                maxPenalitiesPerPerson,
-                currentSimulationTime
-            )
+            if (
+                this.isNewRound(
+                    currentSimulationTime,
+                    intervalBetweenRounds,
+                    algorithmConfig.rounds
+                )
+            ) {
+                const priority = this.determinePriority(
+                    seats.length,
+                    simulationData.numberOfSeats,
+                    algorithmConfig.swapFactor
+                )
+
+                greedySortQueue(arrivals, priority, maxPenalitiesPerPerson)
+            }
 
             servers = processServicesArrivals(
                 arrivals,
@@ -182,6 +188,22 @@ export const greedySimulation = Object.assign(heritage, {
         )
     },
 
+    isNewRound(simulationTime, intervalBetweenRounds, numberOfRounds) {
+        return (
+            simulationTime !== 0 &&
+            simulationTime % intervalBetweenRounds === 0 &&
+            simulationTime / intervalBetweenRounds <= numberOfRounds
+        )
+    },
+
+    determinePriority(lengthOfQueueSeats, numberOfSeatsInSystem, swapFactor) {
+        if (
+            lengthOfQueueSeats >= Math.round(swapFactor * numberOfSeatsInSystem)
+        )
+            return 'seatPriority'
+        return 'queuePriority'
+    },
+
     saveSimulationDataToFile(
         simulationData,
         departures,
@@ -190,16 +212,20 @@ export const greedySimulation = Object.assign(heritage, {
         notProcessed,
         path
     ) {
+        makeDir(path)
+
         departures = departures.map(instance => {
             const { ...departures } = instance
             return departures
         })
-        makeDir(path)
+
         saveDataToJSON(`${path}/departures.json`, departures)
+
         const meanWaitingTimeInArrivalsQueue = this.averageWaitingTimeQueue(
             departures,
             simulationData.populationSize - notProcessed
         )
+
         const meanWaitingTimeInSeatsQueue = this.averageWaitingTimeSeat(
             departures,
             simulationData.populationSize - notProcessed
@@ -223,7 +249,7 @@ export const greedySimulation = Object.assign(heritage, {
                 dataPerRounds.numbersOfUsedSeats,
                 currentSimulationTime
             ),
-            PenaltiesApplied: this.getPenaltiesApplied(departures)
+            penaltiesApplied: this.getPenaltiesApplied(departures)
         })
     }
 })

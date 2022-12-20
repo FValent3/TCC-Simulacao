@@ -3,24 +3,17 @@
 import { copyObject } from '@utils/object'
 import { removeFromQueue } from '@utils/queue'
 
-export function localSearch(arrivals, seats, intervalBetweenRounds, state) {
-    if (state === 'notExecuted') return
-
+export function localSearch(arrivals, seats, intervalBetweenRounds) {
     const remainingTimeInTables = getRemainingTimeInTables(
         seats,
         intervalBetweenRounds
     )
 
-    const firstSolution = getNewSolution(
-        arrivals,
-        copyObject(remainingTimeInTables)
-    )
+    let solution = getNewSolution(arrivals, copyObject(remainingTimeInTables))
 
     const removed = []
-    let currentSolution = firstSolution
-    for (let i = 0; i < firstSolution.queue.length; i++) {
-        removed.push(firstSolution.queue[i])
-
+    for (let i = 0; i < solution.queue.length; i++) {
+        removed.push(solution.queue[i])
         const newArrivals = copyObject(arrivals)
         removeFromQueue(newArrivals, removed)
 
@@ -29,8 +22,8 @@ export function localSearch(arrivals, seats, intervalBetweenRounds, state) {
             copyObject(remainingTimeInTables)
         )
 
-        if (newSolution.effectiveness < currentSolution.effectiveness) {
-            currentSolution = newSolution
+        if (newSolution.effectiveness < solution.effectiveness) {
+            solution = newSolution
         } else {
             removed.pop()
         }
@@ -75,13 +68,12 @@ function getNewSolution(queue, remainingTimeInTables, solution = []) {
         if (policy) break
         j = i % tablesLength
 
-        const instance = queue[i]
         const remainingTime = remainingTimeInTables[j]
-        const timeToBeBurned = instance.simulationData.seatTime
+        const timeToBeBurned = queue[i].simulationData.seatTime
 
         if (remainingTime >= timeToBeBurned) {
             remainingTimeInTables[j] = remainingTime - timeToBeBurned
-            solution.push(instance)
+            solution.push(queue[i])
         } else {
             arr[j] = 1
         }

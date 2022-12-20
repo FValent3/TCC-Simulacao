@@ -10,15 +10,14 @@ import {
     processServiceDepartures,
     processServicesArrivals
 } from '@queueSystem/services'
-import { cumulativeSums, normalization } from '@utils/data'
 import { makeDir, readFile, saveDataToJSON } from '@utils/file'
 
-import { simulation } from './simulation.js'
+import { greedySimulation } from './greedySimulation.js'
 
 const PATH_DATASET = 'data/datasets'
 const ARQUIVO_CONFIGURACAO = 'algorithmConfig.json'
 
-const { salvarDadosSimulacao, ...heritage } = simulation
+const { salvarDadosSimulacao, ...heritage } = greedySimulation
 
 export const prioritySortingLocalSearch = Object.assign(heritage, {
     start(dataset, distributions, algorithmConfig) {
@@ -27,7 +26,6 @@ export const prioritySortingLocalSearch = Object.assign(heritage, {
         let servers = []
         let waitingSeats = []
         let departures = []
-        let state = ''
 
         const { simulationData } = dataset
 
@@ -38,7 +36,7 @@ export const prioritySortingLocalSearch = Object.assign(heritage, {
         )
 
         const numberOfSeats = simulationData.numberOfSeats
-        let seats = new Array(numberOfSeats)
+        let seats = new Array(numberOfSeats).fill(null)
 
         this.fixCalculationOfTimeIntervals(
             population,
@@ -51,9 +49,11 @@ export const prioritySortingLocalSearch = Object.assign(heritage, {
             numbersOfUsedSeats: []
         }
 
-        const intervalBetweenRounds =
-            simulationData.maxSimulationTime / algorithmConfig.rounds - 1
+        const intervalBetweenRounds = Math.round(
+            simulationData.maxSimulationTime / (algorithmConfig.rounds + 1)
+        )
         const maxPenalitiesPerPerson = 1
+
         while (
             currentSimulationTime < simulationData.maxSimulationTime &&
             departures.length < simulationData.populationSize
@@ -64,18 +64,22 @@ export const prioritySortingLocalSearch = Object.assign(heritage, {
                 currentSimulationTime
             )
 
-            state = greedySortQueue(
-                arrivals,
-                intervalBetweenRounds,
-                seats.length,
-                simulationData.numberOfSeats,
-                algorithmConfig.rounds,
-                algorithmConfig.swapFactor,
-                maxPenalitiesPerPerson,
-                currentSimulationTime
-            )
+            if (
+                this.isNewRound(
+                    currentSimulationTime,
+                    intervalBetweenRounds,
+                    algorithmConfig.rounds
+                )
+            ) {
+                const priority = this.determinePriority(
+                    this.getNumberOfOccupiedSpaces(seats),
+                    simulationData.numberOfSeats,
+                    algorithmConfig.swapFactor
+                )
 
-            localSearch(arrivals, seats, intervalBetweenRounds, state)
+                greedySortQueue(arrivals, priority, maxPenalitiesPerPerson)
+                localSearch(arrivals, seats, intervalBetweenRounds)
+            }
 
             servers = processServicesArrivals(
                 arrivals,
@@ -157,38 +161,6 @@ export const prioritySortingLocalSearch = Object.assign(heritage, {
         return JSON.parse(readFile(PATH_CONFIGURACAO, 'utf8'))
     },
 
-    generatePopulation(distributions = [], populationSize = 1) {
-        const cumulativeSumsTime = cumulativeSums(...distributions.arrivals)
-        const cumulativeSumsNormalizedTime = normalization(
-            distributions.service
-        )
-        const seatsNormalizedTime = normalization(distributions.seats)
-        const population = [...Array(populationSize)].map((_, id) => {
-            return {
-                id: id,
-                statusPipeline: 'available',
-                penalties: 0,
-                queuePriority: cumulativeSumsNormalizedTime[id],
-                seatPriority: seatsNormalizedTime[id],
-                simulationData: {
-                    cumulativeSumTime: cumulativeSumsTime[id],
-                    serviceTime: distributions.service[id],
-                    seatTime: distributions.seats[id]
-                },
-                simulation: {}
-            }
-        })
-
-        return population
-    },
-
-    getPenaltiesApplied(departures) {
-        return departures.reduce(
-            (previous, current) => (previous += current.penalties),
-            0
-        )
-    },
-
     getNumberOfOccupiedSpaces(arr) {
         let count = 0
         const arrLength = arr.length
@@ -216,11 +188,13 @@ export const prioritySortingLocalSearch = Object.assign(heritage, {
         notProcessed,
         path
     ) {
+        makeDir(path)
+
         departures = departures.map(instance => {
             const { ...departures } = instance
             return departures
         })
-        makeDir(path)
+
         saveDataToJSON(`${path}/departures.json`, departures)
 
         const meanWaitingTimeInArrivalsQueue = this.averageWaitingTimeQueue(
@@ -250,7 +224,7 @@ export const prioritySortingLocalSearch = Object.assign(heritage, {
                 dataPerRounds.numbersOfUsedSeats,
                 currentSimulationTime
             ),
-            PenaltiesApplied: this.getPenaltiesApplied(departures)
+            penaltiesApplied: this.getPenaltiesApplied(departures)
         })
     }
 })

@@ -23,7 +23,7 @@ function getSeatsDepartures(seats, currentSimulationTime) {
         const departureTime =
             simulation.seatArrivalTime + simulationData.seatTime
 
-        if (currentSimulationTime >= departureTime) return seat
+        return currentSimulationTime >= departureTime
     })
 }
 

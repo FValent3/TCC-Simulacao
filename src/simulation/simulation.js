@@ -26,12 +26,14 @@ export const simulation = {
             waitingSeatsLength: [],
             numbersOfUsedSeats: []
         }
+
         const { simulationData } = dataset
 
         const population = this.generatePopulation(
             distributions,
             simulationData.populationSize
         )
+
         this.fixCalculationOfTimeIntervals(
             population,
             simulationData.numberOfServers

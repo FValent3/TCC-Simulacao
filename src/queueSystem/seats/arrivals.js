@@ -20,8 +20,8 @@ export function processSeatsArrivals(
     )
 
     processNewSeatsArrivals(seatsArrivals, currentSimulationTime)
-    removeFromQueue(seats, seatsArrivals)
     printSeatsArrivals(seatsArrivals, debug)
+    removeFromQueue(seats, seatsArrivals)
     updatePipelineObjectToAvailable(seats, currentSimulationTime)
 
     return [...usingSeats, ...seatsArrivals]

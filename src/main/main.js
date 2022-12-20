@@ -7,7 +7,6 @@ import {
 import { getDirsNames, readFileJSON } from '@utils/file'
 
 import {
-    graphsComposition,
     processResults,
     runSimulations,
     saveReplicationToFile
@@ -43,8 +42,7 @@ const FILE_SEEDS = 'seeds.json'
                 )
 
                 for (const experiment of experiments) {
-                    const numberOfReplications = seeds.length
-
+                    const numberOfReplications = 20
                     for (let i = 0; i < numberOfReplications; i++) {
                         const { simulationData, arrivals, service, seats } =
                             dataset
@@ -84,8 +82,6 @@ const FILE_SEEDS = 'seeds.json'
                     processResults(pathResults)
                 }
             }
-            const pathGraphsComposition = `${PATH_OUTPUTS}/${dataset.parent}/${dataset.name}`
-            graphsComposition(pathGraphsComposition)
         }
     }
 })()

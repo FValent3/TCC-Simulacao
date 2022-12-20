@@ -23,7 +23,7 @@ function getSeatsDepartures(seats, currentSimulationTime) {
         const departureTime =
             simulation.seatArrivalTime + simulationData.seatTime
 
-        if (currentSimulationTime >= departureTime) return seat
+        return currentSimulationTime >= departureTime
     })
 }
 
@@ -37,19 +37,14 @@ function processNewSeatsDepartures(seatsDepartures, currentSimulationTime) {
 
 function removeFromQueue(queue, toRemove) {
     const toRemoveLength = toRemove.length
-    let countSplice = 0
     for (let j = 0; j < toRemoveLength; j++) {
         for (let i = 0; i < queue.length; i++) {
+            if (queue[i] === null) continue
             if (toRemove[j].id === queue[i].id) {
-                queue.splice(i--, 1)
-                countSplice++
+                queue[i] = null
                 break
             }
         }
-    }
-
-    for (let i = 0; i < countSplice; i++) {
-        queue.push(null)
     }
 }
 

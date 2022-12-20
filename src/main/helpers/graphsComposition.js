@@ -47,5 +47,6 @@ export function graphsComposition(path) {
         formatDatatoGraph(greedyResults, properties),
         formatDatatoGraph(simulationMetaResults, properties)
     )
+
     graph(path, result)
 }
